@@ -1,6 +1,7 @@
 from config import *
 from utils import read_html
-from html_parser import parse_html
+from html_parser_parsel import parse_html
+# from html_parser import parse_html
 from pprint import pprint
 from db import *
 import time
@@ -20,3 +21,10 @@ if __name__=="__main__":
     main()    
 
 
+'''
+With Pasrel - 6 rows inserted.
+0.11361384391784668
+
+With LXML -6 rows inserted.
+0.11993670463562012
+'''

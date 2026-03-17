@@ -5,6 +5,7 @@ import re
 
 class Store(BaseModel):
     name:     str
+    store_id : Optional[int]=None
     city:     Optional[str] = None
     state:    Optional[str] = None
     address:  Optional[str] = None

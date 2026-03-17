@@ -8,6 +8,7 @@ def create_Table(cursor,TAB):
     ddl=f'''CREATE TABLE IF NOT EXISTS {TAB}(
             id       INT AUTO_INCREMENT PRIMARY KEY,
             name     VARCHAR(255)  NOT NULL,
+            store_id INT UNIQUE,
             city     VARCHAR(100),
             state    VARCHAR(100),
             address  VARCHAR(500),
@@ -19,10 +20,13 @@ def create_Table(cursor,TAB):
     );'''
     cursor.execute(ddl)
 def insert_into_db(data, cursor, con):
+    if not data:                          
+        print("No data to insert.")
+        return
     try:
         cols = ",".join(data[0].keys())
         vals = ",".join(["%s"] * len(data[0].keys()))
-        insert_query = f"INSERT INTO `{TABLE_NAME}` ({cols}) VALUES ({vals});"
+        insert_query = f"INSERT INTO `{TABLE_NAME}` ({cols}) VALUES ({vals}) ON DUPLICATE KEY UPDATE store_id=store_id;"
         rows = [tuple(p_data.values()) for p_data in data]
         cursor.executemany(insert_query, rows)
         con.commit()

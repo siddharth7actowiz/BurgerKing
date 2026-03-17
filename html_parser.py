@@ -1,32 +1,48 @@
-from lxml import html
+from lxml import html ,etree
 from validation import Store
 from pydantic import ValidationError
+import re
+from utils import read_json 
+from config import JSON_PATH
+
 def parse_html(data):
     parsed_data = []
     tree = html.fromstring(data)
+    xpaths = read_json(JSON_PATH)
  
-    stores = tree.xpath('//div[@class="store-info-box"]')
+    stores = tree.xpath(xpaths.get("stores"))
  
     for store in stores:
         item = {}
- 
-        name_anchor = store.xpath('.//li[contains(@class,"outlet-name")]//a')[0]
+        website_url = store.xpath(xpaths.get("website_url")).strip()
+        storeid = re.search(r'-(\d+)', website_url)
+        
+        name_anchor = store.xpath(xpaths.get("name_anchor"))[0]
         item["name"] = name_anchor.text_content().strip()
+        item["store_id"] = int(storeid.group(1)) 
         item["city"] = name_anchor.get("data-track-event-city", "").strip()
         item["state"] = name_anchor.get("data-track-event-state", "").strip()
-        address = store.xpath('.//li[contains(@class,"outlet-address")]//span/text()')
+
+        address = store.xpath(xpaths.get("address"))
         item["address"] = " ".join(a.strip() for a in address if a.strip())
-        item["phone"] = store.xpath('.//li[contains(@class,"outlet-phone")]//a/text()')[0].strip()
-        item["timings"] = store.xpath('.//li[contains(@class,"outlet-timings")]//span/text()')[0].strip()
-        website = store.xpath('.//a[contains(@class,"btn-website")]/@href')
-        item["website"] = website[0] if website else None
-        map_url = store.xpath('.//a[contains(@class,"btn-direction")]/@href')
+
+        item["phone"] = store.xpath(xpaths.get("phone"))[0].strip()
+        item["timings"] = store.xpath(xpaths.get("timings"))[0].strip()
+              
+        item["website"] = website_url
+
+        map_url = store.xpath(xpaths.get("map_url"))
         item["map_url"] = map_url[0] if map_url else None
+
         parsed_data.append(item)
  
-    try:
-        for i in parsed_data:
-            Store(**i)
-        return parsed_data
-    except ValidationError as v:
-        print("Error",parse_html.__name__,v)
+    clean_data = []
+
+    for i in parsed_data:
+        try:
+            validated = Store(**i)
+            clean_data.append(validated.model_dump())
+        except ValidationError as e:
+            print("Validation Error:", e)
+
+    return clean_data

@@ -1,0 +1,9 @@
+{
+  "stores": "//div[@class='store-info-box']",
+  "website_url": "string(.//a[contains(@class,'website')]/@href)",
+  "name_anchor": ".//li[contains(@class,'outlet-name')]//a",
+  "address": ".//li[contains(@class,'outlet-address')]//span/text()",
+  "phone": "string(.//li[contains(@class,'outlet-phone')]//a/text())",
+  "timings": "string(.//li[contains(@class,'outlet-timings')]//span/text())",
+  "map_url": ".//a[contains(@class,'btn-direction')]/@href"
+}
